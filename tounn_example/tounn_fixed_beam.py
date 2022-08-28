@@ -109,12 +109,19 @@ loss_function = TopOptLoss()
 optimizer = optim.Adam(top_optimizer.parameters(), amsgrad=True, lr=learning_rate)
 
 # Calculate objective zero for scaling the loss function
-density.vector()[:] = volume_ratio
+# density.vector()[:] = volume_ratio
+density.vector()[:] = 0.5
 
 solver.solve()
 
 psi_0 = project(psi(u_sol), D).vector()[:].sum()
 obj_0 = ((volume_ratio**penal) * psi_0).sum()
+
+# Training data
+training_data = []
+
+xdmf.write(density, 0)
+training_data.append([0, obj_0, np.average(density.vector()[:])])
 
 # Get mid points for each cell, filter and move them to cpu/gpu
 mid_points = create_mid_points(mesh, dim)
@@ -126,11 +133,8 @@ volumes = torch.tensor(volumes, requires_grad=True).float().to(device)
 
 vol_fraction = torch.sum(volumes) * volume_ratio
 
-# Training data
-training_data = []
-
 # Training loop
-for epoch in range(max_epochs):
+for epoch in range(1, max_epochs):
 
     # Set gradients to zero
     optimizer.zero_grad()
@@ -152,8 +156,7 @@ for epoch in range(max_epochs):
     objective = torch.tensor((density_new_np**(2 * penal)) * psi_vector).float().to(device)
 
     # Calculate loss
-    loss, vol_constraint = loss_function(density_new_tt, objective, vol_fraction, penal, obj_0,
-                                         alpha, volumes)
+    loss = loss_function(density_new_tt, objective, vol_fraction, penal, obj_0, alpha, volumes)
 
     # Backward pass
     loss.backward(retain_graph=True)
@@ -179,7 +182,7 @@ for epoch in range(max_epochs):
     density_avg = np.average(density_new_np)
     loss_item = loss.item()
 
-    training_data.append([epoch, objective_sum, density_avg, loss_item, rel_grey_elements])
+    training_data.append([epoch, objective_sum, density_avg])
 
     # Print info
     if (epoch % log_interval == 0):

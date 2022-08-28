@@ -11,4 +11,4 @@ class TopOptLoss(nn.Module):
         objective = torch.sum(torch.div(objective, density_new_tt**penal)) / psi_0
         vol_constraint = torch.sum(density_new_tt * volumes) / volume_fraction - 1.0
 
-        return objective + alpha * torch.pow(vol_constraint, 2), vol_constraint
+        return objective + alpha * torch.pow(vol_constraint, 2)

@@ -11,7 +11,7 @@ NAME = "simp_fixed_beam"
 
 nelx = 180
 nely = 60
-volfrac = 0.3
+volume_ratio = 0.3
 penal = 3.0
 rmin = 2.0
 
@@ -44,7 +44,7 @@ U = VectorFunctionSpace(mesh, "P", 1)
 D = FunctionSpace(mesh, "DG", 0)
 u, v = TrialFunction(U), TestFunction(U)
 u_sol, density_old, density = Function(U), Function(D), Function(D, name="density")
-density.vector()[:] = volfrac
+density.vector()[:] = volume_ratio
 
 # DEFINE SUPPORT
 support = CompiledSubDomain("x[0]<=2 && x[1]==0 || x[0]>=(l-2) && x[1]==0", l=nelx)
@@ -97,20 +97,20 @@ while loop < 500:
                     1.0,
                     np.minimum(density.vector()[:] + move,
                                density.vector()[:] * np.sqrt(-sensitivity / l_mid)))))
-        l1, l2 = (l_mid, l2) if sum(density_new) - volfrac * mesh.num_cells() > 0 else (l1, l_mid)
+        l1, l2 = (l_mid, l2) if sum(density_new) - volume_ratio * mesh.num_cells() > 0 else (l1,
+                                                                                             l_mid)
 
     density.vector()[:] = density_new
 
     # PRINT RESULTS
     change = norm(density.vector() - density_old.vector(), norm_type="linf", mesh=mesh)
     obj = sum(objective)
-    sum_density = np.average(density_new)
+    sum_density = np.average(density_old.vector()[:])
+    xdmf.write(density_old, loop - 1)
 
     print("it.: {0} , obj.: {1:.3f} Vol.: {2:.3f}, ch.: {3:.3f}".format(
         loop, obj, sum_density, change))
 
-    training_data.append([loop, obj, sum_density])
-
-    xdmf.write(density, loop)
+    training_data.append([loop - 1, obj, sum_density])
 
 write_to_csv(training_data, data_directory)

@@ -11,7 +11,7 @@ NAME = "simp_cantiveler_beam"
 
 nelx = 180
 nely = 60
-volfrac = 0.5
+volume_ratio = 0.5
 penal = 3.0
 rmin = 2.0
 
@@ -41,7 +41,7 @@ U = VectorFunctionSpace(mesh, "P", 1)
 D = FunctionSpace(mesh, "DG", 0)
 u, v = TrialFunction(U), TestFunction(U)
 u_sol, density_old, density = Function(U), Function(D), Function(D, name="density")
-density.vector()[:] = volfrac
+density.vector()[:] = volume_ratio
 
 # DEFINE SUPPORT
 support = CompiledSubDomain("near(x[0], 0.0, tol) && on_boundary", tol=1e-14)
@@ -94,7 +94,8 @@ while loop < 500:
                     1.0,
                     np.minimum(density.vector()[:] + move,
                                density.vector()[:] * np.sqrt(-sensitivity / l_mid)))))
-        l1, l2 = (l_mid, l2) if sum(density_new) - volfrac * mesh.num_cells() > 0 else (l1, l_mid)
+        l1, l2 = (l_mid, l2) if sum(density_new) - volume_ratio * mesh.num_cells() > 0 else (l1,
+                                                                                             l_mid)
 
     density.vector()[:] = density_new
 

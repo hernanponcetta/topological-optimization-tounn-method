@@ -39,8 +39,6 @@ def write_to_csv(training_data, data_directory):
                 'epoch': row[0],
                 'objective': row[1],
                 'density_avg': row[2],
-                'loss': row[3],
-                'relation_grey_elements': row[4]
             })
 
 
