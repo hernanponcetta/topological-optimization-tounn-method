@@ -1,25 +1,23 @@
-# FEniCS-Torch: optimización topológica
+FEniCS-Torch: Topological Optimization
+How to Run the Examples
+The recommended way to run the examples is by using a Docker container. Installation instructions can be found at Get Docker.
 
-## Como ejecutar los ejemplos
+Once Docker is installed, you can run the examples by doing the following:
 
-La forma recomendada de ejecutar los ejemplos es utilizando un contenerdor Docker, las instrucciones de instalación se pueden consultar en [Get Docker](https://docs.docker.com/get-docker/)
+git clone --recurse-submodules https://github.com/hernanponcetta/ps-fenics-torch.git
 
-Un vez instalado Docker es posible ejecutarlos haciendo:
+cd ps-fenics-torch
 
-`git clone --recurse-submodules https://github.com/hernanponcetta/ps-fenics-torch.git`
+docker build -t ps-fenics-torch .
 
-`cd ps-fenics-torch`
+docker run -it --name=ps-fenics-torch -v ${PWD}:/home/ps-fenics-torch --rm ps-fenics-torch
 
-`docker build -t ps-fenics-torch .`
+Then, for example, to run wheel_opt.py:
 
-`docker run -it --name=ps-fenics-torch -v ${PWD}:/home/ps-fenics-torch --rm ps-fenics-torch`
+cd wheel_opt
 
-Luego, por ejemplo, para ejecutar wheel_opt.py:
+python3 wheel_opt.py
 
-`cd wheel_opt`
+To exit and remove the container:
 
-`python3 wheel_opt.py`
-
-Para salir y remover el contanedor:
-
-`exit`
+exit
